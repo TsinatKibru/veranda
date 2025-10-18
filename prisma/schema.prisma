@@ -1,0 +1,100 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  role          Role      @default(CLIENT)
+  companyName   String?
+  contactInfo   String?
+  password_hash String
+  requests      Request[]
+  messages      Message[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+}
+
+model Category {
+  id             String    @id @default(cuid())
+  name           String
+  description    String?
+  image_uri      String?
+  is_active      Boolean   @default(true)
+  category_order Int?
+  products       Product[]
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+}
+
+model Material {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  image_uri   String?
+  products    Product[]
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+}
+
+model Product {
+  id                 String    @id @default(cuid())
+  name               String
+  description        String?
+  category_id        String?
+  material_id        String?
+  image_uri          String?
+  product_image_urls String[]
+  specs              Json?
+  price_range        String?
+  availability       Boolean   @default(true)
+  stock              Int       @default(0)
+  category           Category? @relation(fields: [category_id], references: [id])
+  material           Material? @relation(fields: [material_id], references: [id])
+  requests           Request[]
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+}
+
+model Request {
+  id           String        @id @default(cuid())
+  user_id      String
+  product_id   String
+  quantity     Int?
+  custom_specs Json?
+  status       RequestStatus @default(PENDING)
+  notes        String?
+  user         User          @relation(fields: [user_id], references: [id])
+  product      Product       @relation(fields: [product_id], references: [id])
+  messages     Message[]
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+}
+
+enum RequestStatus {
+  PENDING
+  QUOTED
+  APPROVED
+  REJECTED
+}
+
+model Message {
+  id           String   @id @default(cuid())
+  request_id   String
+  from_user_id String
+  content      String
+  request      Request  @relation(fields: [request_id], references: [id])
+  from_user    User     @relation(fields: [from_user_id], references: [id])
+  created_at   DateTime @default(now())
+}
