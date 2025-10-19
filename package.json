@@ -4,14 +4,16 @@
   "description": "Next.js application for Veranda Plastics outdoor furniture",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build",
+    "postinstall": "prisma generate",
     "start": "next start",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev --name init",
     "prisma:studio": "prisma studio",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "prisma db seed"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
@@ -37,7 +39,6 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.65.0",
-    "react-icons": "^5.5.0",
     "tailwindcss": "^4.1.14",
     "typescript": "^5.9.3",
     "zod": "^4.1.12"
