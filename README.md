@@ -5,40 +5,43 @@ A modern, scalable Next.js 15 application for managing outdoor furniture manufac
 ## Features
 
 ### Public Landing Page
-- Hero section showcasing outdoor furniture
-- Product grid with category and material filters
-- About, Sustainability, and Contact sections
-- "Request a Quote" CTA for new clients
+- **Refined Hero Content**: High-impact furniture showcase.
+- **Product Gallery**: Expanded catalog featuring 15+ premium products across 4 categories.
+- **Dynamic Filters**: Real-time filtering by Category and Material.
+- **"Request a Quote" CTA**: Integrated with the new multi-item quote system.
 
 ### Client Portal
-- User registration and login
-- Dashboard to submit and track quote requests
-- Real-time messaging with admin
-- View company details and request history
+- **Persistent Quote Basket**: Built with Zustand for a seamless "Add to Quote" experience.
+- **Multi-item Requests**: Submit multiple products in a single inquiry.
+- **Real-time Messaging**: Instant communication with admins via Pusher-powered chat.
+- **Live Status Tracking**: Immediate updates on request status (Pending, Quoted, etc.).
+- **Premium Feedback**: Modern toast notifications for every user action.
 
 ### Admin Dashboard
-- Secure admin access
-- Complete CRUD operations for Products, Categories, and Materials
-- Manage quote requests and update statuses
-- Two-way messaging with clients
-- Dashboard statistics and analytics
-- Cloudinary image upload support
+- **Request Oversight**: Itemized view of multi-product inquiries with full spec details.
+- **Real-time Control**: Chat with clients instantly and update request statuses live.
+- **Inventory Management**: Complete CRUD operations for Products, Categories, and Materials.
+- **Performance Analytics**: Real-time dashboard statistics.
+- **Cloudinary Integration**: Effortless image hosting for furniture catalog.
 
 ## Tech Stack
 
 - **Frontend**: Next.js 15 (App Router), React 19, TypeScript
-- **Styling**: Tailwind CSS, Framer Motion
-- **Backend**: Next.js API Routes
-- **Database**: PostgreSQL (Docker) with Prisma ORM
-- **Authentication**: NextAuth.js with Credentials provider
+- **Styling**: Tailwind CSS 4, Framer Motion
+- **State Management**: Zustand (for the Quote Basket)
+- **Real-time**: Pusher Channels (Chat & Notifications)
+- **Database**: PostgreSQL with Prisma ORM
+- **Feedback**: Sonner (Modern Toast Notifications)
+- **Authentication**: NextAuth.js
 - **Image Storage**: Cloudinary
-- **Validation**: Zod, React Hook Form
+- **Form Handling**: React Hook Form, Zod
 
 ## Prerequisites
 
 - Node.js 18+ and npm
 - Docker and Docker Compose
-- Cloudinary account (optional, for image uploads)
+- Pusher account (for real-time features)
+- Cloudinary account (for image uploads)
 
 ## Getting Started
 
@@ -54,66 +57,25 @@ npm install
 npm run docker:up
 ```
 
-This starts a PostgreSQL container on port 5432.
-
 ### 3. Configure Environment Variables
 
-Copy `.env.example` to `.env` and update if needed:
+Copy `.env.example` to `.env` and fill in your credentials.
 
-```bash
-cp .env.example .env
-```
+**Required for Real-time:**
+- `PUSHER_APP_ID`
+- `PUSHER_SECRET`
+- `NEXT_PUBLIC_PUSHER_KEY`
+- `NEXT_PUBLIC_PUSHER_CLUSTER`
 
-The default values are:
-
-```env
-DATABASE_URL="postgresql://veranda_admin:veranda_pass@localhost:5432/veranda_db?schema=public"
-NEXTAUTH_SECRET=development-secret-key-replace-in-production
-NEXTAUTH_URL=http://localhost:3000
-
-# Optional - for image uploads
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-CLOUDINARY_UPLOAD_PRESET=
-```
-
-### 4. Generate Prisma Client
+### 4. Setup Database
 
 ```bash
 npm run prisma:generate
-```
-
-### 5. Run Database Migrations
-
-```bash
-npm run prisma:migrate
-```
-
-### 6. Seed the Database
-
-```bash
+npm run vercel-build # Runs build push and build
 npm run seed
 ```
 
-This creates:
-- Sample admin and client users
-- Categories (Outdoor Chairs, Tables, Planters, Waste Bins)
-- Materials (High-Density Plastic, Recycled Plastic, Metal Frame, Wood Composite)
-- Sample products with specifications
-- Sample quote request with messages
-
-### 7. Start Development Server
-
-```bash
-npm run dev
-```
-
-Visit [http://localhost:3000](http://localhost:3000)
-
 ## Demo Credentials
-
-After seeding, you can log in with:
 
 **Admin Account:**
 - Email: `admin@veranda.com`
@@ -123,160 +85,31 @@ After seeding, you can log in with:
 - Email: `client@example.com`
 - Password: `1qaz2wsx3edc`
 
-## Available Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm run start` | Start production server |
-| `npm run docker:up` | Start PostgreSQL container |
-| `npm run docker:down` | Stop PostgreSQL container |
-| `npm run prisma:generate` | Generate Prisma Client |
-| `npm run prisma:migrate` | Run database migrations |
-| `npm run prisma:studio` | Open Prisma Studio (DB GUI) |
-| `npm run seed` | Seed database with sample data |
-
-## Database Schema
-
-### User
-- Stores client and admin user information
-- Includes company details and contact info
-- Password hashed with bcrypt
-
-### Category
-- Product categories (chairs, tables, etc.)
-- Sortable with `categoryOrder`
-- Can be activated/deactivated
-
-### Material
-- Material types (plastic, metal, wood composite)
-- Linked to products
-
-### Product
-- Product catalog with specs stored as JSON
-- Multiple images support via `productImageUrls`
-- Stock tracking and availability
-
-### Request
-- Quote requests from clients
-- Status tracking (PENDING, QUOTED, APPROVED, REJECTED)
-- Custom specifications stored as JSON
-
-### Message
-- Two-way messaging between clients and admin
-- Linked to specific requests
-
 ## Project Structure
 
 ```
 ├── app/
-│   ├── api/              # API routes
-│   │   ├── auth/         # NextAuth configuration
-│   │   ├── categories/   # Category CRUD
-│   │   ├── materials/    # Material CRUD
-│   │   ├── products/     # Product CRUD
-│   │   ├── requests/     # Request management
-│   │   ├── messages/     # Messaging system
-│   │   ├── upload/       # Cloudinary uploads
-│   │   └── register/     # User registration
-│   ├── admin/            # Admin dashboard
-│   ├── dashboard/        # Client portal
-│   ├── login/            # Login page
-│   ├── register/         # Registration page
-│   ├── layout.tsx        # Root layout
-│   ├── page.tsx          # Landing page
-│   ├── providers.tsx     # Session provider
-│   └── globals.css       # Global styles
-├── components/           # Reusable components
-│   ├── Header.tsx
-│   ├── Footer.tsx
-│   └── ProductCard.tsx
+│   ├── api/              # API routes (Pusher triggers, Prisma CRUD)
+│   ├── admin/            # Executive Overview & Request Panels
+│   ├── dashboard/        # Client Request Center
+│   ├── layout.tsx        # Global Layout with BasketDrawer & Toaster
+├── components/           # UI Components (ProductCard, Stats, Sidebar)
 ├── lib/
-│   └── prisma.ts         # Prisma client singleton
-├── prisma/
-│   ├── schema.prisma     # Database schema
-│   └── seed.ts           # Seed script
-├── docker-compose.yml    # PostgreSQL container
-├── next.config.js        # Next.js configuration
-├── tailwind.config.ts    # Tailwind configuration
-└── tsconfig.json         # TypeScript configuration
+│   ├── store.ts          # Zustand Basket Store
+│   ├── pusher.ts         # Pusher Client/Server config
+│   └── prisma.ts         # Prisma Client
+└── prisma/
+    ├── schema.prisma     # Multi-item Relational Schema
+    └── seed.ts           # Clean-state Seeding (15 Products)
 ```
-
-## Deployment
-
-### Database Migration
-
-For production deployments:
-
-1. Set `DATABASE_URL` to your production database
-2. Run migrations: `npx prisma migrate deploy`
-3. Set a secure `NEXTAUTH_SECRET`: `openssl rand -base64 32`
-
-### Environment Variables
-
-Ensure all environment variables are set in your deployment platform:
-- `DATABASE_URL`
-- `NEXTAUTH_SECRET`
-- `NEXTAUTH_URL`
-- Cloudinary credentials (if using image uploads)
-
-### Build
-
-```bash
-npm run build
-npm run start
-```
-
-## Features Roadmap
-
-- [ ] Product image gallery management
-- [ ] Bulk quote requests
-- [ ] Email notifications
-- [ ] Invoice generation
-- [ ] Advanced analytics dashboard
-- [ ] Multi-language support
-- [ ] Export data to CSV/PDF
 
 ## Architecture Notes
 
-- **App Router**: Uses Next.js 15 App Router for improved performance and SEO
-- **Server Components**: Leverages React Server Components where applicable
-- **API Routes**: RESTful API design with proper error handling
-- **Authentication**: JWT-based sessions with NextAuth
-- **Database**: Prisma provides type-safe database access
-- **Real-time**: Polling-based updates (can be extended with WebSockets)
-
-## Troubleshooting
-
-### Docker Issues
-
-If PostgreSQL fails to start:
-```bash
-npm run docker:down
-docker volume prune
-npm run docker:up
-```
-
-### Database Connection
-
-If you get connection errors, ensure:
-1. PostgreSQL container is running: `docker ps`
-2. `.env` DATABASE_URL matches docker-compose settings
-3. Port 5432 is not in use by another service
-
-### Prisma Issues
-
-Reset database if needed:
-```bash
-npx prisma migrate reset
-npm run seed
-```
+- **Real-time Messaging**: Uses Pusher WebSockets to eliminate polling latency.
+- **Optimistic UI**: Chat messages and basket actions update locally first for zero perceived lag.
+- **Persistence**: The Quote Basket survives refreshes using LocalStorage sync via Zustand.
+- **Responsive Layout**: Designed for executive management on desktop and field-ready use on mobile.
 
 ## License
 
 ISC
-
-## Support
-
-For issues or questions, please create an issue in the repository.
