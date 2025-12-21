@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { toast } from "sonner";
 
 export default function BasketDrawer() {
     const { items, removeItem, updateQuantity, clearBasket } = useBasketStore();
@@ -38,7 +39,13 @@ export default function BasketDrawer() {
                 clearBasket();
                 setNotes("");
                 setIsOpen(false);
-                alert("Quote request submitted successfully!");
+                toast.success("Quote Submitted", {
+                    description: "Your quote request has been sent successfully. Our team will review it and get back to you soon!",
+                });
+            } else {
+                toast.error("Submission Failed", {
+                    description: "There was an error sending your quote request. Please try again later.",
+                });
             }
         } catch (error) {
             console.error("Error submitting quote:", error);

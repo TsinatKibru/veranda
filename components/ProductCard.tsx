@@ -2,6 +2,9 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { useSession } from 'next-auth/react';
+import { toast } from 'sonner';
+import { useBasketStore } from '@/lib/store';
 
 interface Product {
   id: string;
@@ -14,6 +17,9 @@ interface Product {
 }
 
 export default function ProductCard({ product }: { product: Product }) {
+  const { data: session } = useSession();
+  const addItem = useBasketStore((state) => state.addItem);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -68,12 +74,23 @@ export default function ProductCard({ product }: { product: Product }) {
             <button
               onClick={(e) => {
                 e.preventDefault();
-                require("@/lib/store").useBasketStore.getState().addItem({
+                if (!session) {
+                  toast.error("Login Required", {
+                    description: "Please sign in to add items to your quote request.",
+                  });
+                  return;
+                }
+
+                addItem({
                   productId: product.id,
                   name: product.name,
                   imageUri: product.imageUri || undefined,
                   priceRange: product.priceRange || undefined,
                   quantity: 1
+                });
+
+                toast.success("Added to Basket", {
+                  description: `${product.name} has been added to your quote request.`,
                 });
               }}
               className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-primary-700 transition-all active:scale-95"

@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import BasketDrawer from "@/components/BasketDrawer";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,6 +27,7 @@ export default function RootLayout({
         <Providers>
           {children}
           <BasketDrawer />
+          <Toaster position="top-center" richColors />
         </Providers>
       </body>
     </html>
