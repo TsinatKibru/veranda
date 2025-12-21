@@ -24,7 +24,7 @@ export async function PATCH(
     const { status } = body;
     const params = await context.params;
 
-    const request = await prisma.request.update({
+    const quoteRequest = await prisma.quoteRequest.update({
       where: { id: params.id },
       data: { status },
       include: {
@@ -36,11 +36,29 @@ export async function PATCH(
             companyName: true,
           },
         },
-        product: true,
+        items: {
+          include: {
+            product: true,
+          }
+        },
       },
     });
 
-    return NextResponse.json(request);
+    // Notify client via Pusher (Real-time update)
+    const pusher = new (require('pusher'))({
+      appId: process.env.PUSHER_APP_ID,
+      key: process.env.NEXT_PUBLIC_PUSHER_KEY,
+      secret: process.env.PUSHER_SECRET,
+      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
+      useTLS: true,
+    });
+
+    await pusher.trigger(`user-${quoteRequest.userId}`, "status-update", {
+      quoteRequestId: quoteRequest.id,
+      status: quoteRequest.status,
+    });
+
+    return NextResponse.json(quoteRequest);
   } catch (error) {
     console.error('Error updating request:', error);
     return NextResponse.json(

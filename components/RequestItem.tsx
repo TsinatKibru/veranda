@@ -17,18 +17,21 @@ interface Message {
 interface RequestItemProps {
     request: {
         id: string;
-        product: {
-            name: string;
-            imageUri?: string;
-            priceRange?: string;
-            stock?: number;
-        };
+        items: {
+            id: string;
+            quantity: number;
+            product: {
+                name: string;
+                imageUri?: string;
+                priceRange?: string;
+                stock?: number;
+            };
+        }[];
         user: {
             name: string;
             companyName?: string;
             email: string;
         };
-        quantity: number;
         status: string;
         createdAt: string;
         notes?: string;
@@ -54,6 +57,8 @@ export default function RequestItem({
     setSelectedRequestId,
 }: RequestItemProps) {
     const isSelected = selectedRequestId === request.id;
+    const itemsCount = request.items.length;
+    const mainItem = request.items[0];
 
     return (
         <div
@@ -66,11 +71,11 @@ export default function RequestItem({
             >
                 <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
                     <div className="flex gap-6 flex-1">
-                        <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-md border-2 border-white flex-shrink-0">
-                            {request.product.imageUri ? (
+                        <div className="w-24 h-24 rounded-2xl overflow-hidden shadow-md border-2 border-white flex-shrink-0 relative">
+                            {mainItem?.product.imageUri ? (
                                 <img
-                                    src={request.product.imageUri}
-                                    alt={request.product.name}
+                                    src={mainItem.product.imageUri}
+                                    alt={mainItem.product.name}
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
@@ -80,26 +85,29 @@ export default function RequestItem({
                                     </svg>
                                 </div>
                             )}
+                            {itemsCount > 1 && (
+                                <div className="absolute inset-0 bg-primary-600/60 backdrop-blur-sm flex items-center justify-center">
+                                    <span className="text-white font-black text-xl">+{itemsCount - 1}</span>
+                                </div>
+                            )}
                         </div>
 
                         <div className="space-y-2">
                             <div className="flex items-center gap-3">
-                                <h3 className="font-black text-2xl text-gray-900 tracking-tight">{request.product.name}</h3>
+                                <h3 className="font-black text-2xl text-gray-900 tracking-tight">
+                                    {itemsCount === 1 ? mainItem?.product.name : `Quote Request for ${itemsCount} items`}
+                                </h3>
                                 <Badge type={request.status}>{request.status}</Badge>
                             </div>
 
                             <div className="flex flex-wrap items-center gap-4 text-sm font-bold">
                                 <div className="flex items-center gap-1.5 text-primary-600">
                                     <span className="w-1.5 h-1.5 rounded-full bg-primary-600"></span>
-                                    {request.product.priceRange || "Price on Quote"}
-                                </div>
-                                <div className="text-gray-400">|</div>
-                                <div className={`flex items-center gap-1.5 ${request.product.stock && request.product.stock > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                                    {request.product.stock ?? 0} In Stock
+                                    Catalog Quotation
                                 </div>
                                 <div className="text-gray-400">|</div>
                                 <div className="text-gray-500">
-                                    Qty: <span className="text-gray-900">{request.quantity}</span>
+                                    Items: <span className="text-gray-900">{itemsCount}</span>
                                 </div>
                             </div>
 
@@ -163,6 +171,35 @@ export default function RequestItem({
                         className="overflow-hidden bg-gray-50/30 rounded-b-3xl border-t border-gray-100"
                     >
                         <div className="p-8">
+                            <div className="mb-10">
+                                <h4 className="text-sm font-black uppercase tracking-[0.2em] text-gray-400 mb-6">Requested Items</h4>
+                                <div className="grid gap-4">
+                                    {request.items.map((item) => (
+                                        <div key={item.id} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-gray-100 group/item hover:border-primary-100 transition-colors">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-50 border border-gray-100">
+                                                    {item.product.imageUri ? (
+                                                        <img src={item.product.imageUri} alt={item.product.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-bold text-gray-900">{item.product.name}</p>
+                                                    <p className="text-xs font-semibold text-primary-600">{item.product.priceRange || "Price on Quote"}</p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-xs font-black text-gray-400 uppercase tracking-widest mb-1">Quantity</p>
+                                                <p className="text-lg font-black text-gray-900 leading-none">{item.quantity}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
                             <div className="flex items-center justify-between mb-8">
                                 <h4 className="text-sm font-black uppercase tracking-[0.2em] text-gray-400">Communication History</h4>
                                 <div className="h-[1px] flex-1 bg-gray-100 mx-6"></div>
@@ -191,8 +228,8 @@ export default function RequestItem({
                                                 </div>
                                                 <div
                                                     className={`p-4 rounded-2xl text-sm font-medium leading-relaxed shadow-sm ${isSelf
-                                                            ? "bg-primary-600 text-white rounded-tr-none shadow-primary-100"
-                                                            : "bg-white text-gray-700 rounded-tl-none border border-gray-100"
+                                                        ? "bg-primary-600 text-white rounded-tr-none shadow-primary-100"
+                                                        : "bg-white text-gray-700 rounded-tl-none border border-gray-100"
                                                         }`}
                                                 >
                                                     {message.content}

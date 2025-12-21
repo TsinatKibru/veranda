@@ -16,7 +16,7 @@ export async function GET(req: Request) {
 
     const where: any = role === 'ADMIN' ? {} : { userId: userId };
 
-    const requests = await prisma.request.findMany({
+    const requests = await prisma.quoteRequest.findMany({
       where,
       include: {
         user: {
@@ -27,10 +27,14 @@ export async function GET(req: Request) {
             companyName: true,
           },
         },
-        product: {
+        items: {
           include: {
-            category: true,
-            material: true,
+            product: {
+              include: {
+                category: true,
+                material: true,
+              },
+            },
           },
         },
         messages: {
@@ -69,19 +73,27 @@ export async function POST(req: Request) {
 
     const userId = (session.user as any).id;
     const body = await req.json();
-    const { productId, quantity, customSpecs, notes } = body;
+    const { items, notes } = body; // items is an array of { productId, quantity, customSpecs }
 
-    const request = await prisma.request.create({
+    const quoteRequest = await prisma.quoteRequest.create({
       data: {
         userId: userId,
-        productId,
-        quantity,
-        customSpecs,
         notes,
         status: 'PENDING',
+        items: {
+          create: items.map((item: any) => ({
+            productId: item.productId,
+            quantity: item.quantity,
+            customSpecs: item.customSpecs,
+          })),
+        },
       },
       include: {
-        product: true,
+        items: {
+          include: {
+            product: true,
+          }
+        },
         user: {
           select: {
             id: true,
@@ -93,7 +105,7 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json(request, { status: 201 });
+    return NextResponse.json(quoteRequest, { status: 201 });
   } catch (error) {
     console.error('Error creating request:', error);
     return NextResponse.json(

@@ -54,6 +54,46 @@ export default function AdminDashboard() {
         router.push("/dashboard");
       } else {
         fetchData();
+
+        // Pusher Real-time Subscriptions
+        const pusherClient = require("@/lib/pusher").default;
+        const channel = pusherClient.subscribe("admin-notifications");
+
+        channel.bind("new-message", (data: any) => {
+          // Update the specific request's messages if it's already in the state
+          setRequests(prev => prev.map(req => {
+            if (req.id === data.quoteRequestId) {
+              // Check if message already exists to avoid duplicates
+              if (req.messages.find((m: any) => m.id === data.message.id)) return req;
+              return {
+                ...req,
+                messages: [...req.messages, data.message]
+              };
+            }
+            return req;
+          }));
+
+          // If the selected request is the one that got a message, update it too
+          setSelectedRequest((prev: any) => {
+            if (prev?.id === data.quoteRequestId) {
+              if (prev.messages.find((m: any) => m.id === data.message.id)) return prev;
+              return {
+                ...prev,
+                messages: [...prev.messages, data.message]
+              };
+            }
+            return prev;
+          });
+        });
+
+        channel.bind("new-request", (data: any) => {
+          // New request submitted, refresh the list
+          fetchData();
+        });
+
+        return () => {
+          pusherClient.unsubscribe("admin-notifications");
+        };
       }
     }
   }, [status, session, router]);
@@ -80,6 +120,12 @@ export default function AdminDashboard() {
       setProducts(productsData);
       setCategories(categoriesData);
       setMaterials(materialsData);
+
+      // Sync selected request if it exists
+      if (selectedRequest) {
+        const updated = requestsData.find((r: any) => r.id === selectedRequest.id);
+        if (updated) setSelectedRequest(updated);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -216,7 +262,7 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleSendMessage = async (e: React.FormEvent, requestId: string, content: string) => {
+  const handleSendMessage = async (e: React.FormEvent, quoteRequestId: string, content: string) => {
     e.preventDefault();
     if (!content.trim()) return;
 
@@ -224,12 +270,29 @@ export default function AdminDashboard() {
       const response = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ requestId, content }),
+        body: JSON.stringify({ quoteRequestId, content }),
       });
 
       if (response.ok) {
+        const newMessage = await response.json();
         setMessageContent("");
-        fetchData();
+
+        // Update local state immediately
+        setRequests(prev => prev.map(req => {
+          if (req.id === quoteRequestId) {
+            if (req.messages.find((m: any) => m.id === newMessage.id)) return req;
+            return { ...req, messages: [...req.messages, newMessage] };
+          }
+          return req;
+        }));
+
+        setSelectedRequest((prev: any) => {
+          if (prev?.id === quoteRequestId) {
+            if (prev.messages.find((m: any) => m.id === newMessage.id)) return prev;
+            return { ...prev, messages: [...prev.messages, newMessage] };
+          }
+          return prev;
+        });
       }
     } catch (error) {
       console.error("Error sending message:", error);

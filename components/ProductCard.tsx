@@ -63,6 +63,24 @@ export default function ProductCard({ product }: { product: Product }) {
               {product.priceRange}
             </p>
           )}
+
+          <div className="pt-4 flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                require("@/lib/store").useBasketStore.getState().addItem({
+                  productId: product.id,
+                  name: product.name,
+                  imageUri: product.imageUri || undefined,
+                  priceRange: product.priceRange || undefined,
+                  quantity: 1
+                });
+              }}
+              className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-primary-700 transition-all active:scale-95"
+            >
+              Add to Quote
+            </button>
+          </div>
         </div>
       </Link>
     </motion.div>

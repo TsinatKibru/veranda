@@ -82,25 +82,31 @@ export default function DashboardOverview({ stats, requests }: OverviewProps) {
                 <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
                     <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Activity</h2>
                     <div className="space-y-6">
-                        {requests.slice(0, 4).map((request, i) => (
-                            <div
-                                key={request.id}
-                                className="flex items-start gap-4 group"
-                            >
-                                <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-primary-50 group-hover:text-primary-600 transition-colors">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
+                        {requests.slice(0, 4).map((request, i) => {
+                            const itemCount = request.items.length;
+                            const mainItem = request.items[0];
+                            return (
+                                <div
+                                    key={request.id}
+                                    className="flex items-start gap-4 group"
+                                >
+                                    <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-primary-50 group-hover:text-primary-600 transition-colors">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                    </div>
+                                    <div className="flex-1 border-b border-gray-50 pb-4 group-last:border-0">
+                                        <h3 className="text-sm font-bold text-gray-900 line-clamp-1">
+                                            {itemCount === 1 ? mainItem?.product.name : `${mainItem?.product.name} + ${itemCount - 1} more`}
+                                        </h3>
+                                        <p className="text-xs text-gray-500 mt-0.5">
+                                            {request.user.name} • {new Date(request.createdAt).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                    <Badge type={request.status} className="scale-75 origin-right">{request.status}</Badge>
                                 </div>
-                                <div className="flex-1 border-b border-gray-50 pb-4 group-last:border-0">
-                                    <h3 className="text-sm font-bold text-gray-900 line-clamp-1">{request.product.name}</h3>
-                                    <p className="text-xs text-gray-500 mt-0.5">
-                                        {request.user.name} • {new Date(request.createdAt).toLocaleDateString()}
-                                    </p>
-                                </div>
-                                <Badge type={request.status} className="scale-75 origin-right">{request.status}</Badge>
-                            </div>
-                        ))}
+                            );
+                        })}
                         {requests.length === 0 && (
                             <p className="text-center text-gray-500 py-8">No activity yet.</p>
                         )}

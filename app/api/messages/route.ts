@@ -13,24 +13,24 @@ export async function POST(req: Request) {
 
     const userId = (session.user as any).id;
     const body = await req.json();
-    const { requestId, content } = body;
+    const { quoteRequestId, content } = body;
 
-    const request = await prisma.request.findUnique({
-      where: { id: requestId },
+    const quoteRequest = await prisma.quoteRequest.findUnique({
+      where: { id: quoteRequestId },
     });
 
-    if (!request) {
+    if (!quoteRequest) {
       return NextResponse.json({ error: 'Request not found' }, { status: 404 });
     }
 
     const userRole = (session.user as any).role;
-    if (userRole !== 'ADMIN' && request.userId !== userId) {
+    if (userRole !== 'ADMIN' && quoteRequest.userId !== userId) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const message = await prisma.message.create({
       data: {
-        requestId,
+        quoteRequestId,
         fromUserId: userId,
         content,
       },
@@ -43,6 +43,22 @@ export async function POST(req: Request) {
           },
         },
       },
+    });
+
+    // Notify the other party via Pusher
+    const pusher = new (require('pusher'))({
+      appId: process.env.PUSHER_APP_ID,
+      key: process.env.NEXT_PUBLIC_PUSHER_KEY,
+      secret: process.env.PUSHER_SECRET,
+      cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER,
+      useTLS: true,
+    });
+
+    const targetChannel = userRole === 'ADMIN' ? `user-${quoteRequest.userId}` : 'admin-notifications';
+
+    await pusher.trigger(targetChannel, "new-message", {
+      message,
+      quoteRequestId,
     });
 
     return NextResponse.json(message, { status: 201 });

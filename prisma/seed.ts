@@ -223,24 +223,30 @@ async function main() {
   const loungeChair = products.find((p) => p.name.includes('Lounge Chair'));
 
   if (client && loungeChair) {
-    const request = await prisma.request.create({
+    const quoteRequest = await prisma.quoteRequest.create({
       data: {
         userId: client.id,
-        productId: loungeChair.id,
-        quantity: 50,
         status: 'PENDING',
         notes: 'Need 50 units for our new poolside area. Can we get a bulk discount?',
-        customSpecs: {
-          color_preference: 'Navy',
-          delivery_date: '2025-11-01',
-        },
+        items: {
+          create: [
+            {
+              productId: loungeChair.id,
+              quantity: 50,
+              customSpecs: {
+                color_preference: 'Navy',
+                delivery_date: '2025-11-01',
+              },
+            }
+          ]
+        }
       },
     });
 
     if (admin) {
       await prisma.message.create({
         data: {
-          requestId: request.id,
+          quoteRequestId: quoteRequest.id,
           fromUserId: client.id,
           content: 'Hi, I would like to discuss pricing for a bulk order of 50 lounge chairs.',
         },
@@ -248,7 +254,7 @@ async function main() {
 
       await prisma.message.create({
         data: {
-          requestId: request.id,
+          quoteRequestId: quoteRequest.id,
           fromUserId: admin.id,
           content:
             'Thank you for your inquiry! For an order of 50 units, we can offer a 15% discount. Let me prepare a detailed quote for you.',
@@ -256,7 +262,7 @@ async function main() {
       });
     }
 
-    console.log('✓ Sample request and messages seeded');
+    console.log('✓ Sample quote request and messages seeded');
   }
 
   console.log('\n✅ Database seeded successfully!');

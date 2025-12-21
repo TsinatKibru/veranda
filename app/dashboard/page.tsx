@@ -28,6 +28,46 @@ export default function DashboardPage() {
         router.push("/admin");
       } else {
         fetchData();
+
+        // Pusher Real-time Subscriptions
+        const pusherClient = require("@/lib/pusher").default;
+        const userId = (session.user as any).id;
+        const channel = pusherClient.subscribe(`user-${userId}`);
+
+        channel.bind("new-message", (data: any) => {
+          setRequests(prev => prev.map(req => {
+            if (req.id === data.quoteRequestId) {
+              if (req.messages.find((m: any) => m.id === data.message.id)) return req;
+              return { ...req, messages: [...req.messages, data.message] };
+            }
+            return req;
+          }));
+
+          setSelectedRequest((prev: any) => {
+            if (prev?.id === data.quoteRequestId) {
+              if (prev.messages.find((m: any) => m.id === data.message.id)) return prev;
+              return { ...prev, messages: [...prev.messages, data.message] };
+            }
+            return prev;
+          });
+        });
+
+        channel.bind("status-update", (data: any) => {
+          setRequests(prev => prev.map(req => {
+            if (req.id === data.quoteRequestId) {
+              return { ...req, status: data.status };
+            }
+            return req;
+          }));
+
+          if (selectedRequest?.id === data.quoteRequestId) {
+            setSelectedRequest((prev: any) => ({ ...prev, status: data.status }));
+          }
+        });
+
+        return () => {
+          pusherClient.unsubscribe(`user-${userId}`);
+        };
       }
     }
   }, [status, session, router]);
@@ -44,6 +84,11 @@ export default function DashboardPage() {
       ]);
       setRequests(requestsData);
       setProducts(productsData);
+
+      if (selectedRequest) {
+        const updated = requestsData.find((r: any) => r.id === selectedRequest.id);
+        if (updated) setSelectedRequest(updated);
+      }
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -51,34 +96,9 @@ export default function DashboardPage() {
     }
   };
 
-  const handleSubmitRequest = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const response = await fetch("/api/requests", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          productId: selectedProduct,
-          quantity: parseInt(quantity),
-          notes,
-        }),
-      });
-
-      if (response.ok) {
-        setShowRequestForm(false);
-        setSelectedProduct("");
-        setQuantity("");
-        setNotes("");
-        fetchData();
-      }
-    } catch (error) {
-      console.error("Error submitting request:", error);
-    }
-  };
-
   const handleSendMessage = async (
     e: React.FormEvent,
-    requestId: string,
+    quoteRequestId: string,
     content: string
   ) => {
     e.preventDefault();
@@ -89,14 +109,31 @@ export default function DashboardPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          requestId: requestId,
-          content: content,
+          quoteRequestId,
+          content,
         }),
       });
 
       if (response.ok) {
+        const newMessage = await response.json();
         setMessageContent("");
-        fetchData();
+
+        // Update local state immediately
+        setRequests(prev => prev.map(req => {
+          if (req.id === quoteRequestId) {
+            if (req.messages.find((m: any) => m.id === newMessage.id)) return req;
+            return { ...req, messages: [...req.messages, newMessage] };
+          }
+          return req;
+        }));
+
+        setSelectedRequest((prev: any) => {
+          if (prev?.id === quoteRequestId) {
+            if (prev.messages.find((m: any) => m.id === newMessage.id)) return prev;
+            return { ...prev, messages: [...prev.messages, newMessage] };
+          }
+          return prev;
+        });
       }
     } catch (error) {
       console.error("Error sending message:", error);
@@ -137,84 +174,27 @@ export default function DashboardPage() {
           />
         </div>
 
-        <div className="mb-6">
-          <button
-            onClick={() => setShowRequestForm(!showRequestForm)}
-            className="btn-primary"
-          >
-            {showRequestForm ? "Cancel" : "New Quote Request"}
-          </button>
-        </div>
-
-        {showRequestForm && (
-          <div className="card mb-8">
-            <h2 className="text-xl font-semibold mb-4">Request a Quote</h2>
-            <form onSubmit={handleSubmitRequest} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Product
-                </label>
-                <select
-                  value={selectedProduct}
-                  onChange={(e) => setSelectedProduct(e.target.value)}
-                  required
-                  className="input-field"
-                >
-                  <option value="">Select a product</option>
-                  {products.map((product) => (
-                    <option key={product.id} value={product.id}>
-                      {product.name} - {product.priceRange}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Quantity
-                </label>
-                <input
-                  type="number"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                  required
-                  min="1"
-                  className="input-field"
-                  placeholder="e.g., 50"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Additional Notes
-                </label>
-                <textarea
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  className="input-field"
-                  rows={4}
-                  placeholder="Any special requirements or questions..."
-                />
-              </div>
-
-              <button type="submit" className="btn-primary">
-                Submit Request
-              </button>
-            </form>
-          </div>
-        )}
-
-        <div className="bg-white rounded-lg shadow-md">
-          <div className="p-6 border-b">
-            <h2 className="text-xl font-semibold">My Requests</h2>
+        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+          <div className="p-8 border-b border-gray-100 bg-gray-50/30 flex justify-between items-center">
+            <h2 className="text-2xl font-black text-gray-900 tracking-tight">Active Inquiries</h2>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Live Updates Enabled</span>
+            </div>
           </div>
 
           {requests.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              No requests yet. Create your first quote request above!
+            <div className="p-20 text-center">
+              <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">No requests yet</h3>
+              <p className="text-gray-500 mt-2">Browse our catalog and add items to your quote basket!</p>
             </div>
           ) : (
-            <div className="divide-y">
+            <div className="divide-y divide-gray-100">
               {requests.map((request) => (
                 <RequestItem
                   key={request.id}
