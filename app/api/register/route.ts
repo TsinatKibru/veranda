@@ -31,7 +31,7 @@ export async function POST(req: Request) {
       data: {
         name,
         email,
-        password_hash: passwordHash,
+        passwordHash: passwordHash,
         companyName,
         contactInfo,
         role: 'CLIENT',

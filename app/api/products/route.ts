@@ -10,11 +10,11 @@ export async function GET(req: Request) {
     const where: any = { availability: true };
 
     if (categoryId) {
-      where.category_id = categoryId;
+      where.categoryId = categoryId;
     }
 
     if (materialId) {
-      where.material_id = materialId;
+      where.materialId = materialId;
     }
 
     const products = await prisma.product.findMany({
@@ -23,7 +23,7 @@ export async function GET(req: Request) {
         category: true,
         material: true,
       },
-      orderBy: { created_at: 'desc' },
+      orderBy: { createdAt: 'desc' },
     });
 
     return NextResponse.json(products);
@@ -42,12 +42,12 @@ export async function POST(req: Request) {
     const {
       name,
       description,
-      category_id,
-      material_id,
-      image_uri,
-      product_image_urls,
+      categoryId,
+      materialId,
+      imageUri,
+      productImageUrls,
       specs,
-      price_range,
+      priceRange,
       availability,
       stock,
     } = body;
@@ -56,12 +56,12 @@ export async function POST(req: Request) {
       data: {
         name,
         description,
-        category_id,
-        material_id,
-        image_uri,
-        product_image_urls: product_image_urls || [],
+        categoryId,
+        materialId,
+        imageUri,
+        productImageUrls: productImageUrls || [],
         specs,
-        price_range,
+        priceRange,
         availability: availability ?? true,
         stock: stock ?? 0,
       },

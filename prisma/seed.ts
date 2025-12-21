@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-  const passwordHash = await bcrypt.hash('1qaz2wsx3edc', 12);
+  const passwordHash = await bcrypt.hash('1qaz2wsx3edc', 10);
 
   await prisma.user.createMany({
     data: [
@@ -12,7 +12,7 @@ async function main() {
         email: 'admin@veranda.com',
         name: 'Admin User',
         role: 'ADMIN',
-        password_hash: passwordHash,
+        passwordHash: passwordHash,
         companyName: 'Veranda Plastics',
         contactInfo: '+1-555-0100',
       },
@@ -20,7 +20,7 @@ async function main() {
         email: 'client@example.com',
         name: 'Hotel Manager',
         role: 'CLIENT',
-        password_hash: passwordHash,
+        passwordHash: passwordHash,
         companyName: 'Seaside Resort & Spa',
         contactInfo: '+1-555-0200',
       },
@@ -28,7 +28,7 @@ async function main() {
         email: 'client2@example.com',
         name: 'Resort Director',
         role: 'CLIENT',
-        password_hash: passwordHash,
+        passwordHash: passwordHash,
         companyName: 'Mountain View Hotels',
         contactInfo: '+1-555-0300',
       },
@@ -43,26 +43,29 @@ async function main() {
       {
         name: 'Outdoor Chairs',
         description: 'Durable chairs for outdoor hospitality spaces',
-        category_order: 1,
-        is_active: true,
+        categoryOrder: 1,
+        isActive: true,
+        imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870920/verandalounge_chair_-_classic_ubx00x.png',
       },
       {
         name: 'Tables',
         description: 'Weather-resistant tables for patios and poolsides',
-        category_order: 2,
-        is_active: true,
+        categoryOrder: 2,
+        isActive: true,
+        imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870917/verandadiningtable_-_round_mwy64p.png',
       },
       {
         name: 'Planters',
         description: 'Decorative planters for landscaping',
-        category_order: 3,
-        is_active: true,
+        categoryOrder: 3,
+        isActive: true,
+        imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870923/verandaplanter-_large_q0fnwb.png',
       },
       {
         name: 'Waste Bins',
         description: 'Commercial-grade outdoor waste management',
-        category_order: 4,
-        is_active: true,
+        categoryOrder: 4,
+        isActive: true,
       },
     ],
     skipDuplicates: true,
@@ -111,9 +114,10 @@ async function main() {
         name: 'Veranda Lounge Chair - Classic',
         description:
           'Our signature poolside lounge chair with adjustable backrest. Perfect for resorts and hotels.',
-        category_id: chairCategory?.id,
-        material_id: hdPlastic?.id,
-        price_range: '$45 - $65',
+        categoryId: chairCategory?.id,
+        materialId: hdPlastic?.id,
+        priceRange: '$45 - $65',
+        imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870920/verandalounge_chair_-_classic_ubx00x.png',
         availability: true,
         stock: 250,
         specs: {
@@ -127,9 +131,10 @@ async function main() {
         name: 'Veranda Stacking Chair',
         description:
           'Space-saving stackable dining chair for outdoor venues. UV-resistant and easy to clean.',
-        category_id: chairCategory?.id,
-        material_id: recycledPlastic?.id,
-        price_range: '$30 - $45',
+        categoryId: chairCategory?.id,
+        materialId: recycledPlastic?.id,
+        priceRange: '$30 - $45',
+        imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870919/verandastackingchair_jtlqja.png',
         availability: true,
         stock: 500,
         specs: {
@@ -144,9 +149,10 @@ async function main() {
         name: 'Veranda Adirondack Chair',
         description:
           'Classic Adirondack style chair with modern durability. Ideal for patios and terraces.',
-        category_id: chairCategory?.id,
-        material_id: hdPlastic?.id,
-        price_range: '$75 - $95',
+        categoryId: chairCategory?.id,
+        materialId: hdPlastic?.id,
+        priceRange: '$75 - $95',
+        imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870920/verandaadirondackchair_jlcrq8.png',
         availability: true,
         stock: 150,
         specs: {
@@ -159,9 +165,10 @@ async function main() {
       {
         name: 'Veranda Dining Table - Round',
         description: '48" round table perfect for 4-6 guests. Durable and stylish.',
-        category_id: tableCategory?.id,
-        material_id: metalFrame?.id,
-        price_range: '$250 - $350',
+        categoryId: tableCategory?.id,
+        materialId: metalFrame?.id,
+        priceRange: '$250 - $350',
+        imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870917/verandadiningtable_-_round_mwy64p.png',
         availability: true,
         stock: 75,
         specs: {
@@ -174,9 +181,10 @@ async function main() {
       {
         name: 'Veranda Side Table',
         description: 'Compact side table for poolside and patio use.',
-        category_id: tableCategory?.id,
-        material_id: hdPlastic?.id,
-        price_range: '$40 - $60',
+        categoryId: tableCategory?.id,
+        materialId: hdPlastic?.id,
+        priceRange: '$40 - $60',
+        imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760858729/sideTable_hzjoi8.jpg',
         availability: true,
         stock: 200,
         specs: {
@@ -188,9 +196,10 @@ async function main() {
       {
         name: 'Veranda Planter - Large',
         description: 'Commercial-grade planter box for landscaping.',
-        category_id: planterCategory?.id,
-        material_id: recycledPlastic?.id,
-        price_range: '$80 - $120',
+        categoryId: planterCategory?.id,
+        materialId: recycledPlastic?.id,
+        priceRange: '$80 - $120',
+        imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870923/verandaplanter-_large_q0fnwb.png',
         availability: true,
         stock: 100,
         specs: {
@@ -216,12 +225,12 @@ async function main() {
   if (client && loungeChair) {
     const request = await prisma.request.create({
       data: {
-        user_id: client.id,
-        product_id: loungeChair.id,
+        userId: client.id,
+        productId: loungeChair.id,
         quantity: 50,
         status: 'PENDING',
         notes: 'Need 50 units for our new poolside area. Can we get a bulk discount?',
-        custom_specs: {
+        customSpecs: {
           color_preference: 'Navy',
           delivery_date: '2025-11-01',
         },
@@ -231,16 +240,16 @@ async function main() {
     if (admin) {
       await prisma.message.create({
         data: {
-          request_id: request.id,
-          from_user_id: client.id,
+          requestId: request.id,
+          fromUserId: client.id,
           content: 'Hi, I would like to discuss pricing for a bulk order of 50 lounge chairs.',
         },
       });
 
       await prisma.message.create({
         data: {
-          request_id: request.id,
-          from_user_id: admin.id,
+          requestId: request.id,
+          fromUserId: admin.id,
           content:
             'Thank you for your inquiry! For an order of 50 units, we can offer a 15% discount. Let me prepare a detailed quote for you.',
         },

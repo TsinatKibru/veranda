@@ -7,8 +7,8 @@ interface Product {
   id: string;
   name: string;
   description: string | null;
-  image_uri: string | null;
-  price_range: string | null;
+  imageUri: string | null;
+  priceRange: string | null;
   category: { name: string } | null;
   material: { name: string } | null;
 }
@@ -23,9 +23,9 @@ export default function ProductCard({ product }: { product: Product }) {
     >
       <Link href={`/products/${product.id}`}>
         <div className="aspect-square bg-gray-100 rounded-lg mb-4 overflow-hidden">
-          {product.image_uri ? (
+          {product.imageUri ? (
             <img
-              src={product.image_uri}
+              src={product.imageUri}
               alt={product.name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
@@ -58,9 +58,9 @@ export default function ProductCard({ product }: { product: Product }) {
             {product.description}
           </p>
 
-          {product.price_range && (
+          {product.priceRange && (
             <p className="text-primary-600 font-semibold">
-              {product.price_range}
+              {product.priceRange}
             </p>
           )}
         </div>

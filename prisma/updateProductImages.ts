@@ -36,10 +36,10 @@ async function main() {
     },
   ];
 
-  for (const { name, image_url } of productUpdates) {
+  for (const { name, image_url: imageUrl } of productUpdates) {
     await prisma.product.updateMany({
       where: { name },
-      data: { image_uri: image_url }, // use image_uri if that's your field name
+      data: { imageUri: imageUrl },
     });
     console.log(`✓ Updated image for ${name}`);
   }

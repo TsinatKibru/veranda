@@ -13,10 +13,10 @@ export async function POST(req: Request) {
 
     const userId = (session.user as any).id;
     const body = await req.json();
-    const { request_id, content } = body;
+    const { requestId, content } = body;
 
     const request = await prisma.request.findUnique({
-      where: { id: request_id },
+      where: { id: requestId },
     });
 
     if (!request) {
@@ -24,18 +24,18 @@ export async function POST(req: Request) {
     }
 
     const userRole = (session.user as any).role;
-    if (userRole !== 'ADMIN' && request.user_id !== userId) {
+    if (userRole !== 'ADMIN' && request.userId !== userId) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const message = await prisma.message.create({
       data: {
-        request_id,
-        from_user_id: userId,
+        requestId,
+        fromUserId: userId,
         content,
       },
       include: {
-        from_user: {
+        fromUser: {
           select: {
             id: true,
             name: true,

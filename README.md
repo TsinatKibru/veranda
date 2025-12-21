@@ -146,7 +146,7 @@ After seeding, you can log in with:
 
 ### Category
 - Product categories (chairs, tables, etc.)
-- Sortable with `category_order`
+- Sortable with `categoryOrder`
 - Can be activated/deactivated
 
 ### Material
@@ -155,7 +155,7 @@ After seeding, you can log in with:
 
 ### Product
 - Product catalog with specs stored as JSON
-- Multiple images support via `product_image_urls`
+- Multiple images support via `productImageUrls`
 - Stock tracking and availability
 
 ### Request

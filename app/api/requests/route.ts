@@ -14,7 +14,7 @@ export async function GET(req: Request) {
     const userId = (session.user as any).id;
     const role = (session.user as any).role;
 
-    const where: any = role === 'ADMIN' ? {} : { user_id: userId };
+    const where: any = role === 'ADMIN' ? {} : { userId: userId };
 
     const requests = await prisma.request.findMany({
       where,
@@ -35,7 +35,7 @@ export async function GET(req: Request) {
         },
         messages: {
           include: {
-            from_user: {
+            fromUser: {
               select: {
                 id: true,
                 name: true,
@@ -43,10 +43,10 @@ export async function GET(req: Request) {
               },
             },
           },
-          orderBy: { created_at: 'asc' },
+          orderBy: { createdAt: 'asc' },
         },
       },
-      orderBy: { created_at: 'desc' },
+      orderBy: { createdAt: 'desc' },
     });
 
     return NextResponse.json(requests);
@@ -69,14 +69,14 @@ export async function POST(req: Request) {
 
     const userId = (session.user as any).id;
     const body = await req.json();
-    const { product_id, quantity, custom_specs, notes } = body;
+    const { productId, quantity, customSpecs, notes } = body;
 
     const request = await prisma.request.create({
       data: {
-        user_id: userId,
-        product_id,
+        userId: userId,
+        productId,
         quantity,
-        custom_specs,
+        customSpecs,
         notes,
         status: 'PENDING',
       },

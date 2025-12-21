@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
-import Link from "next/link";
+import StatsCard from "@/components/ui/StatsCard";
+import RequestItem from "@/components/RequestItem";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -57,7 +58,7 @@ export default function DashboardPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          product_id: selectedProduct,
+          productId: selectedProduct,
           quantity: parseInt(quantity),
           notes,
         }),
@@ -75,17 +76,21 @@ export default function DashboardPage() {
     }
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const handleSendMessage = async (
+    e: React.FormEvent,
+    requestId: string,
+    content: string
+  ) => {
     e.preventDefault();
-    if (!selectedRequest || !messageContent.trim()) return;
+    if (!content.trim()) return;
 
     try {
       const response = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          request_id: selectedRequest.id,
-          content: messageContent,
+          requestId: requestId,
+          content: content,
         }),
       });
 
@@ -106,21 +111,6 @@ export default function DashboardPage() {
     );
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return "bg-yellow-100 text-yellow-800";
-      case "QUOTED":
-        return "bg-blue-100 text-blue-800";
-      case "APPROVED":
-        return "bg-green-100 text-green-800";
-      case "REJECTED":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -134,24 +124,17 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="card">
-            <div className="text-sm text-gray-600">Total Requests</div>
-            <div className="text-3xl font-bold text-primary-600">
-              {requests.length}
-            </div>
-          </div>
-          <div className="card">
-            <div className="text-sm text-gray-600">Pending</div>
-            <div className="text-3xl font-bold text-yellow-600">
-              {requests.filter((r) => r.status === "PENDING").length}
-            </div>
-          </div>
-          <div className="card">
-            <div className="text-sm text-gray-600">Approved</div>
-            <div className="text-3xl font-bold text-green-600">
-              {requests.filter((r) => r.status === "APPROVED").length}
-            </div>
-          </div>
+          <StatsCard label="Total Requests" value={requests.length} />
+          <StatsCard
+            label="Pending"
+            value={requests.filter((r) => r.status === "PENDING").length}
+            textColor="text-yellow-600"
+          />
+          <StatsCard
+            label="Approved"
+            value={requests.filter((r) => r.status === "APPROVED").length}
+            textColor="text-green-600"
+          />
         </div>
 
         <div className="mb-6">
@@ -180,7 +163,7 @@ export default function DashboardPage() {
                   <option value="">Select a product</option>
                   {products.map((product) => (
                     <option key={product.id} value={product.id}>
-                      {product.name} - {product.price_range}
+                      {product.name} - {product.priceRange}
                     </option>
                   ))}
                 </select>
@@ -233,93 +216,18 @@ export default function DashboardPage() {
           ) : (
             <div className="divide-y">
               {requests.map((request) => (
-                <div key={request.id} className="p-6 hover:bg-gray-50">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="font-semibold text-lg">
-                        {request.product.name}
-                      </h3>
-                      <p className="text-sm text-gray-600">
-                        Quantity: {request.quantity}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {new Date(request.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                        request.status
-                      )}`}
-                    >
-                      {request.status}
-                    </span>
-                  </div>
-
-                  {request.notes && (
-                    <p className="text-gray-700 mb-4">{request.notes}</p>
-                  )}
-
-                  {request.messages.length > 0 && (
-                    <div className="border-t pt-4 mt-4">
-                      <h4 className="font-medium text-sm mb-3">Messages</h4>
-                      <div className="space-y-3">
-                        {request.messages.map((message: any) => (
-                          <div
-                            key={message.id}
-                            className={`p-3 rounded-lg ${
-                              message.from_user.role === "ADMIN"
-                                ? "bg-blue-50"
-                                : "bg-gray-100"
-                            }`}
-                          >
-                            <div className="flex justify-between items-start mb-1">
-                              <span className="font-medium text-sm">
-                                {message.from_user.name}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {new Date(
-                                  message.created_at
-                                ).toLocaleDateString()}
-                              </span>
-                            </div>
-                            <p className="text-sm text-gray-700">
-                              {message.content}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-
-                      <form
-                        onSubmit={(e) => {
-                          setSelectedRequest(request);
-                          handleSendMessage(e);
-                        }}
-                        className="mt-4"
-                      >
-                        <textarea
-                          value={
-                            selectedRequest?.id === request.id
-                              ? messageContent
-                              : ""
-                          }
-                          onChange={(e) => {
-                            setSelectedRequest(request);
-                            setMessageContent(e.target.value);
-                          }}
-                          className="input-field"
-                          rows={2}
-                          placeholder="Type your message..."
-                        />
-                        <button
-                          type="submit"
-                          className="mt-2 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700"
-                        >
-                          Send Message
-                        </button>
-                      </form>
-                    </div>
-                  )}
-                </div>
+                <RequestItem
+                  key={request.id}
+                  request={request}
+                  isAdmin={false}
+                  onSendMessage={handleSendMessage}
+                  messageContent={messageContent}
+                  setMessageContent={setMessageContent}
+                  selectedRequestId={selectedRequest?.id}
+                  setSelectedRequestId={(id) =>
+                    setSelectedRequest(requests.find((r) => r.id === id))
+                  }
+                />
               ))}
             </div>
           )}

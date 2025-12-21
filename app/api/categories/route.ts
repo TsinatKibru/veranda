@@ -4,8 +4,8 @@ import { prisma } from '@/lib/prisma';
 export async function GET() {
   try {
     const categories = await prisma.category.findMany({
-      where: { is_active: true },
-      orderBy: { category_order: 'asc' },
+      where: { isActive: true },
+      orderBy: { categoryOrder: 'asc' },
       include: {
         _count: {
           select: { products: true },
@@ -25,15 +25,15 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, description, image_uri, is_active, category_order } = body;
+    const { name, description, imageUri, isActive, categoryOrder } = body;
 
     const category = await prisma.category.create({
       data: {
         name,
         description,
-        image_uri,
-        is_active: is_active ?? true,
-        category_order,
+        imageUri,
+        isActive: isActive ?? true,
+        categoryOrder,
       },
     });
 

@@ -24,13 +24,13 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, description, image_uri } = body;
+    const { name, description, imageUri } = body;
 
     const material = await prisma.material.create({
       data: {
         name,
         description,
-        image_uri,
+        imageUri,
       },
     });
 
