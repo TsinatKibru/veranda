@@ -6,6 +6,17 @@ const prisma = new PrismaClient();
 async function main() {
   const passwordHash = await bcrypt.hash('1qaz2wsx3edc', 10);
 
+  // Cleanup existing data to prevent duplicates
+  await prisma.message.deleteMany();
+  await prisma.quoteItem.deleteMany();
+  await prisma.quoteRequest.deleteMany();
+  await prisma.product.deleteMany();
+  await prisma.material.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.user.deleteMany();
+
+  console.log('--- Database Cleaned ---');
+
   await prisma.user.createMany({
     data: [
       {
@@ -112,55 +123,58 @@ async function main() {
     data: [
       {
         name: 'Veranda Lounge Chair - Classic',
-        description:
-          'Our signature poolside lounge chair with adjustable backrest. Perfect for resorts and hotels.',
+        description: 'Our signature poolside lounge chair with adjustable backrest. Perfect for resorts and hotels.',
         categoryId: chairCategory?.id,
         materialId: hdPlastic?.id,
         priceRange: '$45 - $65',
         imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870920/verandalounge_chair_-_classic_ubx00x.png',
         availability: true,
         stock: 250,
-        specs: {
-          dimensions: '72" L x 26" W x 14" H',
-          weight: '28 lbs',
-          capacity: '350 lbs',
-          colors: ['White', 'Navy', 'Teal', 'Sand'],
-        },
+        specs: { dimensions: '72" L x 26" W x 14" H', weight: '28 lbs', capacity: '350 lbs', colors: ['White', 'Navy', 'Teal', 'Sand'] },
       },
       {
         name: 'Veranda Stacking Chair',
-        description:
-          'Space-saving stackable dining chair for outdoor venues. UV-resistant and easy to clean.',
+        description: 'Space-saving stackable dining chair for outdoor venues. UV-resistant and easy to clean.',
         categoryId: chairCategory?.id,
         materialId: recycledPlastic?.id,
         priceRange: '$30 - $45',
         imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870919/verandastackingchair_jtlqja.png',
         availability: true,
         stock: 500,
-        specs: {
-          dimensions: '19" L x 20" W x 35" H',
-          weight: '12 lbs',
-          capacity: '300 lbs',
-          stackable: true,
-          colors: ['White', 'Black', 'Grey'],
-        },
+        specs: { dimensions: '19" L x 20" W x 35" H', weight: '12 lbs', capacity: '300 lbs', stackable: true, colors: ['White', 'Black', 'Grey'] },
       },
       {
         name: 'Veranda Adirondack Chair',
-        description:
-          'Classic Adirondack style chair with modern durability. Ideal for patios and terraces.',
+        description: 'Classic Adirondack style chair with modern durability. Ideal for patios and terraces.',
         categoryId: chairCategory?.id,
         materialId: hdPlastic?.id,
         priceRange: '$75 - $95',
         imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870920/verandaadirondackchair_jlcrq8.png',
         availability: true,
         stock: 150,
-        specs: {
-          dimensions: '30" L x 33" W x 38" H',
-          weight: '35 lbs',
-          capacity: '400 lbs',
-          colors: ['White', 'Red', 'Blue', 'Green'],
-        },
+        specs: { dimensions: '30" L x 33" W x 38" H', weight: '35 lbs', capacity: '400 lbs', colors: ['White', 'Red', 'Blue', 'Green'] },
+      },
+      {
+        name: 'Veranda Dining Armchair',
+        description: 'Elegant armrest dining chair for formal outdoor settings. Ergonomic design for maximum comfort.',
+        categoryId: chairCategory?.id,
+        materialId: hdPlastic?.id,
+        priceRange: '$55 - $75',
+        imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870919/verandastackingchair_jtlqja.png',
+        availability: true,
+        stock: 300,
+        specs: { dimensions: '22" L x 21" W x 36" H', weight: '16 lbs', capacity: '350 lbs', colors: ['White', 'Mocha', 'Charcoal'] },
+      },
+      {
+        name: 'Veranda Bar Stool',
+        description: 'High-profile stool for outdoor bars and elevated counters.',
+        categoryId: chairCategory?.id,
+        materialId: metalFrame?.id,
+        priceRange: '$85 - $110',
+        imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870919/verandastackingchair_jtlqja.png',
+        availability: true,
+        stock: 120,
+        specs: { dimensions: '18" L x 18" W x 42" H', seat_height: '30"', weight: '18 lbs' },
       },
       {
         name: 'Veranda Dining Table - Round',
@@ -171,12 +185,29 @@ async function main() {
         imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870917/verandadiningtable_-_round_mwy64p.png',
         availability: true,
         stock: 75,
-        specs: {
-          dimensions: '48" diameter x 29" H',
-          weight: '65 lbs',
-          capacity: '200 lbs',
-          umbrella_hole: true,
-        },
+        specs: { dimensions: '48" diameter x 29" H', weight: '65 lbs', capacity: '200 lbs', umbrella_hole: true },
+      },
+      {
+        name: 'Veranda Rectangular Table',
+        description: 'Large 72" rectangular dining table for family groupings and events.',
+        categoryId: tableCategory?.id,
+        materialId: hdPlastic?.id,
+        priceRange: '$450 - $600',
+        imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870917/verandadiningtable_-_round_mwy64p.png',
+        availability: true,
+        stock: 40,
+        specs: { dimensions: '72" L x 36" W x 29" H', weight: '85 lbs', seats: '6-8' },
+      },
+      {
+        name: 'Veranda Coffee Table',
+        description: 'Low-profile center table for lounge areas and conversation sets.',
+        categoryId: tableCategory?.id,
+        materialId: hdPlastic?.id,
+        priceRange: '$120 - $180',
+        imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760858729/sideTable_hzjoi8.jpg',
+        availability: true,
+        stock: 90,
+        specs: { dimensions: '36" L x 36" W x 16" H', weight: '30 lbs' },
       },
       {
         name: 'Veranda Side Table',
@@ -187,11 +218,7 @@ async function main() {
         imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760858729/sideTable_hzjoi8.jpg',
         availability: true,
         stock: 200,
-        specs: {
-          dimensions: '18" L x 18" W x 20" H',
-          weight: '15 lbs',
-          colors: ['White', 'Black', 'Teal'],
-        },
+        specs: { dimensions: '18" L x 18" W x 20" H', weight: '15 lbs', colors: ['White', 'Black', 'Teal'] },
       },
       {
         name: 'Veranda Planter - Large',
@@ -202,12 +229,62 @@ async function main() {
         imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870923/verandaplanter-_large_q0fnwb.png',
         availability: true,
         stock: 100,
-        specs: {
-          dimensions: '36" L x 18" W x 18" H',
-          weight: '25 lbs',
-          drainage: true,
-          colors: ['Terracotta', 'Stone Grey', 'Forest Green'],
-        },
+        specs: { dimensions: '36" L x 18" W x 18" H', weight: '25 lbs', drainage: true, colors: ['Terracotta', 'Stone Grey', 'Forest Green'] },
+      },
+      {
+        name: 'Veranda Planter - Cube',
+        description: 'Square cube planter for modern architectural accents.',
+        categoryId: planterCategory?.id,
+        materialId: hdPlastic?.id,
+        priceRange: '$60 - $90',
+        imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870923/verandaplanter-_large_q0fnwb.png',
+        availability: true,
+        stock: 150,
+        specs: { dimensions: '20" L x 20" W x 20" H', weight: '18 lbs' },
+      },
+      {
+        name: 'Veranda Hanging Planter',
+        description: 'Space-saving hanging planter with heavy-duty mounting hardware.',
+        categoryId: planterCategory?.id,
+        materialId: hdPlastic?.id,
+        priceRange: '$35 - $50',
+        imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870923/verandaplanter-_large_q0fnwb.png',
+        availability: true,
+        stock: 200,
+        specs: { dimensions: '12" diameter', weight: '5 lbs' },
+      },
+      {
+        name: 'Veranda Slim Waste Bin',
+        description: 'Sleek waste management solution for narrow walkways.',
+        categoryId: categories.find(c => c.name === 'Waste Bins')?.id,
+        materialId: recycledPlastic?.id,
+        priceRange: '$150 - $220',
+        imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870923/verandaplanter-_large_q0fnwb.png',
+        availability: true,
+        stock: 60,
+        specs: { capacity: '30 Gallons', dimensions: '15" W x 15" D x 40" H' },
+      },
+      {
+        name: 'Veranda Double Waste Station',
+        description: 'Dual-stream waste and recycling station for commercial venues.',
+        categoryId: categories.find(c => c.name === 'Waste Bins')?.id,
+        materialId: recycledPlastic?.id,
+        priceRange: '$350 - $500',
+        imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870923/verandaplanter-_large_q0fnwb.png',
+        availability: true,
+        stock: 30,
+        specs: { capacity: '60 Gallons Total', compartments: 2 },
+      },
+      {
+        name: 'Veranda Park Bench',
+        description: 'Heavy-duty 6ft park bench for public spaces and gardens.',
+        categoryId: chairCategory?.id,
+        materialId: recycledPlastic?.id,
+        priceRange: '$280 - $380',
+        imageUri: 'https://res.cloudinary.com/dbcuyckat/image/upload/v1760870920/verandaadirondackchair_jlcrq8.png',
+        availability: true,
+        stock: 45,
+        specs: { dimensions: '72" L x 24" W x 34" H', weight: '120 lbs' },
       },
     ],
     skipDuplicates: true,
